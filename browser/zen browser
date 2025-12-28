@@ -1,48 +1,24 @@
-This documentation provides a streamlined, developer-friendly guide to deploying the Zen Browser container. This setup utilizes KasmVNC to render a full browser GUI directly within your web browser.
-
-Deploying Zen Browser via Docker
-1. Environment Verification
-Before initializing the container, ensure your Docker daemon is active and your user permissions are correctly configured.
-
-Check Docker Status
-On Debian-based (Ubuntu) or RHEL-based (Fedora/AlmaLinux) systems, use systemctl to verify the service status:
-
-Bash
-
-# Check if Docker is active
+Zen Browser Docker Deployment
+Guide1. Environment Verification & PreparationBefore deploying, ensure your host environment (Debian/RHEL/WSL2) is ready to handle GUI-based containers.
+Check Docker Service StatusVerify that the Docker daemon is active and running:Bash# Check status
 sudo systemctl status docker
 
-# If inactive, start the service
+# Start if inactive
 sudo systemctl start docker
-Identify User Permissions
-LinuxServer.io images require matching the container's internal user to your host user to prevent permission issues with saved data. Find your IDs by running:
 
-Bash
-
-id
-PUID: Typically 1000 (Your User ID).
-
-PGID: Typically 1000 (Your Group ID).
-
-2. Initialization: Image Acquisition
-"Pulling" the image downloads the necessary layers from the registry to your local machine.
-
-Bash
-
-docker pull lscr.io/linuxserver/zen:latest
-3. Configuration & Persistent Storage
-Docker containers are ephemeral by default; any bookmarks or settings will be lost if the container is removed. To prevent this, you must initialize a local directory to map as a Volume.
-
-Bash
-
-# Create a hidden or dedicated config folder in your home directory
+Identify Host User Permissions (PUID/PGID)To avoid permission conflicts between the host and the container, you must identify your user's unique IDs. 
+Run the following command:Bashid
+PUID: Your user ID (typically 1000).PGID: Your group ID (typically 1000).
+2. Persistent Storage InitializationDocker containers are ephemeral by default. To ensure your browser profile, history, and bookmarks persist through container updates or restarts, initialize a dedicated configuration directory.
+Bash# Create a dedicated directory for Zen configuration
 mkdir -p ~/zen-config
-4. Full Deployment Command
-This multiline command initializes the container with the necessary security options and hardware allocations.
 
-Bash
+3. Image Acquisition (Pulling)
+Download the official Zen Browser image layers from the LinuxServer.io registry.
+Bashdocker pull lscr.io/linuxserver/zen:latest
 
-docker run -d \
+# 4. Full Deployment Command
+The following command initializes the container with standard GUI configurations, port mappings, and necessary security overrides.Bashdocker run -d \
   --name=zen-browser \
   --security-opt seccomp=unconfined \
   -e PUID=1000 \
@@ -54,24 +30,16 @@ docker run -d \
   --shm-size="1gb" \
   --restart unless-stopped \
   lscr.io/linuxserver/zen:latest
-Detailed Flag Documentation
---security-opt seccomp=unconfined: Required for Chromium-based browsers (like Zen) to allow the internal sandbox to function correctly within the Docker container.
 
--p 3000:3000: Maps the web-based GUI to your local port 3000.
+## Detailed Flag Documentation
 
--v ~/zen-config:/config: Bridges your local folder to the container, ensuring browser profiles and history persist through restarts.
 
---shm-size="1gb": Allocates shared memory to prevent the browser from crashing when loading heavy media or multiple tabs.
+-dDetached Mode: Runs the container in the background.
+--security-optSeccomp: unconfined is often required for Chromium-based sandboxing to function inside Docker.
+-p 3000:3000HTTP GUI: Maps the web-based interface to your host port 3000.
+-v ~/zen-config:/configVolume Mapping: Bridges your local directory to the container's internal settings for data persistence.
+--shm-size="1gb"Shared Memory: Prevents browser tab crashes by allocating sufficient memory for rendering.
+--restart unless-stoppedPolicy: Automatically restarts the container on host reboot unless manually stopped.
 
---restart unless-stopped: Configures the Docker engine to automatically restart the browser if the host machine reboots.
-
-5. Verification & Access
-Once deployed, verify the container is active and accessible.
-
-Check Running Processes: Run docker ps to see the container's status and uptime.
-
-Access the GUI: Open your local web browser and navigate to:
-
-http://localhost:3000
-
-Authentication: If prompted, the default KasmVNC interface usually does not require a password unless specifically configured in the environment variables.
+# 5. Verification & Final AccessAfter execution, verify the container's operational status and access the browser.Container Audit: Run docker ps to verify the container is "Up".Web Access: Open your local browser and navigate to:http://localhost:3000Result: 
+You will now see the Zen Browser GUI running inside your browser via KasmVNC.
