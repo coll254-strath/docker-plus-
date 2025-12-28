@@ -1,0 +1,28 @@
+1. System Initialization
+Run these once to ensure your host environment (Debian/RHEL/WSL2) is prepared.
+
+Bash
+
+# Verify Docker service is active
+sudo systemctl status docker
+
+# Identify your User and Group IDs (typically 1000)
+id
+
+2. Image Acquisition and Storage
+Bash
+
+docker pull lscr.io/linuxserver/code-server:latest
+mkdir -p ~/vscode-config
+Phase 2: Deployment
+
+Bash
+
+docker run -d \
+  --name=code-server \
+  -e PUID=1000 -e PGID=1000 -e TZ=Etc/UTC \
+  -e PASSWORD=password123 \
+  -p 8443:8443 \
+  -v ~/vscode-config:/config \
+  --restart unless-stopped \
+  lscr.io/linuxserver/code-server:latest
