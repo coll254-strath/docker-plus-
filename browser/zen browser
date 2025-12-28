@@ -1,0 +1,55 @@
+ 
+1. To complete the process of running the Zen Browser ** 
+
+Verify the docker environment
+## Check Service Status:
+
+Bash
+sudo systemctl status docker
+
+2. If it is not running, start it with ** sudo systemctl start docker  **.
+
+## Check Version:
+ docker --version
+
+
+3. ## Download the Image
+In Docker, "Pulling" is the equivalent of downloading the software package
+docker pull lscr.io/linuxserver/zen:latest
+
+4. ## Deployment and completion
+
+Phase 1: Initialize Storage Folder
+mkdir -p ~/zen-config
+
+Phase 2: The Full Deployment Command Copy and paste this into your terminal:
+
+docker run -d \
+  --name=zen-browser \
+  --security-opt seccomp=unconfined \
+  -e PUID=1000 \
+  -e PGID=1000 \
+  -e TZ=Etc/UTC \
+  -p 3000:3000 \
+  -p 3001:3001 \
+  -v ~/zen-config:/config \
+  --shm-size="1gb" \
+  --restart unless-stopped \
+  lscr.io/linuxserver/zen:latest
+
+## Phase 3: Documentation of Step 3 Flags
+
+-v ~/zen-config:/config: This "Volumes" flag links your local folder to the container's internal settings.
+
+-e TZ=Etc/UTC: Configures the timezone inside the browser.
+
+--restart unless-stopped: Ensures that if your computer reboots, the browser server starts back up automatically.
+
+Final Completion Check
+Run docker ps to verify the container is running.
+
+Open your web browser on your computer.
+
+Navigate to http://localhost:3000.
+
+You should now see the Zen Browser interface running inside your Docker container.
