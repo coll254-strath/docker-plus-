@@ -1,28 +1,46 @@
- 
-1. To complete the process of running the Zen Browser ** 
+This documentation provides a streamlined, developer-friendly guide to deploying the Zen Browser container. This setup utilizes KasmVNC to render a full browser GUI directly within your web browser.
 
-Verify the docker environment
-## Check Service Status:
+Deploying Zen Browser via Docker
+1. Environment Verification
+Before initializing the container, ensure your Docker daemon is active and your user permissions are correctly configured.
+
+Check Docker Status
+On Debian-based (Ubuntu) or RHEL-based (Fedora/AlmaLinux) systems, use systemctl to verify the service status:
 
 Bash
+
+# Check if Docker is active
 sudo systemctl status docker
 
-2. If it is not running, start it with ** sudo systemctl start docker  **.
+# If inactive, start the service
+sudo systemctl start docker
+Identify User Permissions
+LinuxServer.io images require matching the container's internal user to your host user to prevent permission issues with saved data. Find your IDs by running:
 
-## Check Version:
- docker --version
+Bash
 
+id
+PUID: Typically 1000 (Your User ID).
 
-3. ## Download the Image
-In Docker, "Pulling" is the equivalent of downloading the software package
+PGID: Typically 1000 (Your Group ID).
+
+2. Initialization: Image Acquisition
+"Pulling" the image downloads the necessary layers from the registry to your local machine.
+
+Bash
+
 docker pull lscr.io/linuxserver/zen:latest
+3. Configuration & Persistent Storage
+Docker containers are ephemeral by default; any bookmarks or settings will be lost if the container is removed. To prevent this, you must initialize a local directory to map as a Volume.
 
-4. ## Deployment and completion
+Bash
 
-Phase 1: Initialize Storage Folder
+# Create a hidden or dedicated config folder in your home directory
 mkdir -p ~/zen-config
+4. Full Deployment Command
+This multiline command initializes the container with the necessary security options and hardware allocations.
 
-Phase 2: The Full Deployment Command Copy and paste this into your terminal:
+Bash
 
 docker run -d \
   --name=zen-browser \
@@ -36,20 +54,24 @@ docker run -d \
   --shm-size="1gb" \
   --restart unless-stopped \
   lscr.io/linuxserver/zen:latest
+Detailed Flag Documentation
+--security-opt seccomp=unconfined: Required for Chromium-based browsers (like Zen) to allow the internal sandbox to function correctly within the Docker container.
 
-## Phase 3: Documentation of Step 3 Flags
+-p 3000:3000: Maps the web-based GUI to your local port 3000.
 
--v ~/zen-config:/config: This "Volumes" flag links your local folder to the container's internal settings.
+-v ~/zen-config:/config: Bridges your local folder to the container, ensuring browser profiles and history persist through restarts.
 
--e TZ=Etc/UTC: Configures the timezone inside the browser.
+--shm-size="1gb": Allocates shared memory to prevent the browser from crashing when loading heavy media or multiple tabs.
 
---restart unless-stopped: Ensures that if your computer reboots, the browser server starts back up automatically.
+--restart unless-stopped: Configures the Docker engine to automatically restart the browser if the host machine reboots.
 
-Final Completion Check
-Run docker ps to verify the container is running.
+5. Verification & Access
+Once deployed, verify the container is active and accessible.
 
-Open your web browser on your computer.
+Check Running Processes: Run docker ps to see the container's status and uptime.
 
-Navigate to http://localhost:3000.
+Access the GUI: Open your local web browser and navigate to:
 
-You should now see the Zen Browser interface running inside your Docker container.
+http://localhost:3000
+
+Authentication: If prompted, the default KasmVNC interface usually does not require a password unless specifically configured in the environment variables.
