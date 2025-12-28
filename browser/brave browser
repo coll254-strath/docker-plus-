@@ -1,0 +1,27 @@
+## Before deploying any container, verify your host environment permissions.
+
+Check Docker Service
+Bash
+
+sudo systemctl status docker
+
+Phase 1: Persistent Storage
+Bash
+docker pull lscr.io/linuxserver/brave:latest
+mkdir -p ~/brave-config
+
+Phase 2: Deployment
+
+Bash
+docker run -d \
+  --name=brave-browser \
+  --security-opt seccomp=unconfined \
+  -e PUID=1000 \
+  -e PGID=1000 \
+  -e TZ=Etc/UTC \
+  -p 3002:3000 \
+  -p 3003:3001 \
+  -v ~/brave-config:/config \
+  --shm-size="1gb" \
+  --restart unless-stopped \
+  lscr.io/linuxserver/brave:latest
